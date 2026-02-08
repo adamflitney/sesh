@@ -66,7 +66,8 @@ func CreateSession(project finder.Project) error {
 	}
 
 	// Send opencode command to second window
-	cmd = exec.Command("tmux", "send-keys", "-t", sessionName+":opencode", "opencode .", "Enter")
+	// Start with --port flag so opencode.nvim can connect to it
+	cmd = exec.Command("tmux", "send-keys", "-t", sessionName+":opencode", "opencode --port 0 .", "Enter")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to send opencode command: %w", err)
 	}
