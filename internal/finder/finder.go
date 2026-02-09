@@ -17,6 +17,20 @@ type Project struct {
 func FindGitProjects(directories []string) ([]Project, error) {
 	projectsMap := make(map[string]Project) // Use map to avoid duplicates
 
+	// Directories to skip for performance
+	skipDirs := map[string]bool{
+		"node_modules": true,
+		"vendor":       true,
+		"target":       true,
+		"build":        true,
+		"dist":         true,
+		".next":        true,
+		".cache":       true,
+		"__pycache__":  true,
+		".venv":        true,
+		"venv":         true,
+	}
+
 	for _, dir := range directories {
 		// Check if directory exists
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -28,6 +42,11 @@ func FindGitProjects(directories []string) ([]Project, error) {
 		err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
 			if err != nil {
 				// Skip directories we can't read
+				return filepath.SkipDir
+			}
+
+			// Skip common large directories for performance
+			if d.IsDir() && skipDirs[d.Name()] {
 				return filepath.SkipDir
 			}
 
