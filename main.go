@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/adamflitney/sesh/internal/cache"
 	"github.com/adamflitney/sesh/internal/config"
 	"github.com/adamflitney/sesh/internal/finder"
 	"github.com/adamflitney/sesh/internal/tmux"
@@ -46,6 +47,13 @@ func run() error {
 	// If user quit without selecting, exit gracefully
 	if selectedProject == nil {
 		return nil
+	}
+
+	// Record the selected project in recent history
+	recent, _ := cache.Load()
+	if recent != nil {
+		recent.Add(selectedProject.Name, selectedProject.Path)
+		_ = recent.Save() // Ignore errors for cache saves
 	}
 
 	// Create or attach to tmux session
